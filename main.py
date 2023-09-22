@@ -1,110 +1,15 @@
-import requests
-from bs4 import BeautifulSoup
-from difflib import SequenceMatcher
+Here are some enhancements you can make to the code:
 
+1. Add error handling for HTTP requests: Currently, the code does not handle exceptions that may occur during HTTP requests. Add error handling using try -except blocks to catch and handle possible exceptions, such as `requests.exceptions.RequestException`. You can log the error or display an error message to the user.
 
-class LyricMatcher:
-    def __init__(self):
-        self.lyrics_websites = [
-            "https://www.metrolyrics.com",
-            "https://genius.com",
-            "https://www.lyrics.com",
-        ]
+2. Implement dynamic data retrieval: The code currently retrieves a random song from each lyrics website for similarity matching. Modify the code to scrape lyrics for each song from the search results instead. This will provide a more accurate comparison between the input lyrics and the searched songs.
 
-    def search_lyrics(self, search_query):
-        search_results = []
-        for website in self.lyrics_websites:
-            try:
-                url = f"{website}/search/{search_query.replace(' ', '+')}"
-                response = requests.get(url)
-                if response.status_code == 200:
-                    soup = BeautifulSoup(response.content, "html.parser")
-                    results = soup.find_all("div", class_="content")
-                    for result in results:
-                        title_element = result.find("a", class_="title")
-                        if title_element:
-                            title = title_element.text.strip()
-                            artist_element = result.find("a", class_="artist")
-                            artist = (
-                                artist_element.text.strip() if artist_element else None
-                            )
-                            link = website + title_element["href"]
-                            search_results.append(
-                                {"title": title, "artist": artist, "link": link}
-                            )
-            except requests.exceptions.RequestException:
-                pass
-        return search_results
+3. Refactor lyric search results: The code currently appends search results directly to the `search_results` list. Instead, consider creating a `SearchResult` class with properties such as `title`, `artist`, and `link`. Instantiate objects of this class for each search result and then append them to the `search_results` list. This will make it easier to work with the search results and can provide flexibility for future enhancements.
 
-    def calculate_similarity(self, input_lyrics, song_lyrics):
-        return SequenceMatcher(None, input_lyrics, song_lyrics).ratio()
+4. Refactor song matching results: Similar to the search results, consider creating a `Song` class with properties such as `title`, `artist`, `lyrics`, `similarity`, and `website`. Instantiate objects of this class for each matched song, sort them by similarity, and then return the top matching songs. This will make it easier to work with the matched songs and add additional information in the future.
 
-    def find_song(self, input_lyrics):
-        songs = []
-        for website in self.lyrics_websites:
-            try:
-                url = f"{website}/random"
-                response = requests.get(url)
-                if response.status_code == 200:
-                    soup = BeautifulSoup(response.content, "html.parser")
-                    song_lyrics = soup.find("div", class_="lyrics-body")
-                    if song_lyrics:
-                        song_lyrics = song_lyrics.text.strip()
-                        song_title = soup.find("h1").text.strip()
-                        artist_name = soup.find("h2").text.strip()
+5. Implement user-friendly output: The code currently prints out the search results and matched songs directly to the console. Consider enhancing the output by formatting it in a more user-friendly way. For example, you can use separators between different sections, provide headers for each section, and make the output more visually appealing.
 
-                        similarity = self.calculate_similarity(
-                            input_lyrics, song_lyrics
-                        )
+6. Implement potential extensions: Consider implementing one or more of the potential extensions mentioned in the README file, such as audio matching, sentiment analysis, recommendation system, and mobile app integration. These extensions can enhance the functionality and user experience of the Lyric Matcher.
 
-                        songs.append(
-                            {
-                                "title": song_title,
-                                "artist": artist_name,
-                                "lyrics": song_lyrics,
-                                "similarity": similarity,
-                                "website": website,
-                            }
-                        )
-            except requests.exceptions.RequestException:
-                pass
-        songs.sort(key=lambda x: x["similarity"], reverse=True)
-        matched_songs = songs[:5]
-        return matched_songs
-
-
-if __name__ == "__main__":
-    matcher = LyricMatcher()
-
-    # Input your desired lyrics to search
-    input_lyrics = "I want to hold your hand"
-    search_results = matcher.search_lyrics(input_lyrics)
-
-    if search_results:
-        for result in search_results:
-            print(f"Title: {result['title']}")
-            print(f"Artist: {result['artist']}")
-            print(f"Link: {result['link']}")
-            print()
-
-        selected_song_link = search_results[0]["link"]
-        print("Selected Song Link:", selected_song_link)
-        print()
-
-        matched_songs = matcher.find_song(input_lyrics)
-
-        if matched_songs:
-            for song in matched_songs:
-                print(f"Title: {song['title']}")
-                print(f"Artist: {song['artist']}")
-                if len(song["lyrics"]) > 200:
-                    print(f"Lyrics:\n{song['lyrics'][:200]}...")
-                else:
-                    print(f"Lyrics:\n{song['lyrics']}")
-                print(f"Similarity: {song['similarity']}")
-                print(f"Website: {song['website']}")
-                print()
-        else:
-            print("No matched songs found.")
-    else:
-        print("No search results found.")
+Remember, these are just suggestions for enhancements based on the provided context. You can choose to implement some or all of them based on your requirements and preferences.
