@@ -81,12 +81,12 @@ if __name__ == "__main__":
     search_results = matcher.search_lyrics(input_lyrics)
 
     if search_results:
+        print("Search Results:")
         for result in search_results:
             print(f"Title: {result['title']}")
             print(f"Artist: {result['artist']}")
             print(f"Link: {result['link']}")
             print()
-
         selected_song_link = search_results[0]["link"]
         print("Selected Song Link:", selected_song_link)
         print()
@@ -94,6 +94,7 @@ if __name__ == "__main__":
         matched_songs = matcher.find_song(input_lyrics)
 
         if matched_songs:
+            print("Matched Songs:")
             for song in matched_songs:
                 print(f"Title: {song['title']}")
                 print(f"Artist: {song['artist']}")
